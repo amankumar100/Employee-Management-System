@@ -1,0 +1,201 @@
+from tkinter import*
+from tkinter import ttk
+import pymysql
+class Employee:
+    def __init__(self,root):
+        self.root=root
+        self.root.title("Employee Management System")
+        self.root.geometry("1550x900+0+0")
+        
+        title=Label(self.root,text="Employee Management System",bd=10,relief=GROOVE,font=("times new roman",40,"bold"),bg="orange",fg="brown")
+        title.pack(side=TOP,fill=X)
+        
+        #================All Variables======================
+        
+        self.id_var=StringVar()
+        self.name_var=StringVar()
+        self.email_var=StringVar()
+        self.contact_var=StringVar()
+        self.salary_var=StringVar()
+        self.post_var=StringVar()
+        
+        self.search_by=StringVar()
+        self.search_txt=StringVar()
+        
+        #================Manage Frame=======================
+        
+        Manage_Frame=Frame(self.root,bd=4,relief=RIDGE,bg="orange")
+        Manage_Frame.place(x=20,y=100,width=450,height=580)
+        
+        m_title=Label(Manage_Frame,text="Manage Employees",bg="orange",fg="black",font=("times new roman",30,"bold"))
+        m_title.grid(row=0,columnspan=2,pady=20)
+        
+        lbl_e_id=Label(Manage_Frame,text="Employee ID:",bg="orange",fg="black",font=("times new roman",20,"bold"))
+        lbl_e_id.grid(row=1,column=0,pady=10,padx=20,sticky="w")
+        txt_e_Id=Entry(Manage_Frame,textvariable=self.id_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_e_Id.grid(row=1,column=1,pady=10,padx=20,sticky="w")
+        
+        lbl_name=Label(Manage_Frame,text="Name :",bg="orange",fg="black",font=("times new roman",20,"bold"))
+        lbl_name.grid(row=2,column=0,pady=10,padx=20,sticky="w")
+        txt_Name=Entry(Manage_Frame,textvariable=self.name_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_Name.grid(row=2,column=1,pady=10,padx=20,sticky="w")
+        
+        lbl_email=Label(Manage_Frame,text="E-Mail ID :",bg="orange",fg="black",font=("times new roman",20,"bold"))
+        lbl_email.grid(row=3,column=0,pady=10,padx=20,sticky="w")
+        txt_Email=Entry(Manage_Frame,textvariable=self.email_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_Email.grid(row=3,column=1,pady=10,padx=20,sticky="w")
+        
+        lbl_contact=Label(Manage_Frame,text="Contact:",bg="orange",fg="black",font=("times new roman",20,"bold"))
+        lbl_contact.grid(row=4,column=0,pady=10,padx=20,sticky="w")
+        txt_Contact=Entry(Manage_Frame,textvariable=self.contact_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_Contact.grid(row=4,column=1,pady=10,padx=20,sticky="w")
+        
+        lbl_post=Label(Manage_Frame,text="Designation:",bg="orange",fg="black",font=("times new roman",20,"bold"))
+        lbl_post.grid(row=5,column=0,pady=10,padx=20,sticky="w")
+        txt_Post=Entry(Manage_Frame,textvariable=self.post_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_Post.grid(row=5,column=1,pady=10,padx=20,sticky="w")
+        
+        lbl_salary=Label(Manage_Frame,text="Salary:",bg="orange",fg="black",font=("times new roman",20,"bold"))
+        lbl_salary.grid(row=6,column=0,pady=10,padx=20,sticky="w")
+        txt_Salary=Entry(Manage_Frame,textvariable=self.salary_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_Salary.grid(row=6,column=1,pady=10,padx=20,sticky="w")
+        
+        
+        #====================Button Frame================================
+        
+        btn_Frame=Frame(Manage_Frame,bd=4,relief=RIDGE,bg="orange")
+        btn_Frame.place(x=15,y=500,width=420,)
+        
+        Addbtn=Button(btn_Frame,text="ADD",width=10,command=self.add_employees).grid(row=0,column=0,padx=10,pady=10)
+        updatebtn=Button(btn_Frame,text="UPDATE",width=10,command=self.update_data).grid(row=0,column=1,padx=10,pady=10)
+        deletebtn=Button(btn_Frame,text="DELETE",width=10,command=self.delete_data).grid(row=0,column=2,padx=10,pady=10)
+        clearbtn=Button(btn_Frame,text="CLEAR",width=10,command=self.clear).grid(row=0,column=3,padx=10,pady=10)
+        
+        
+        #==================Detail Frame====================================
+        
+        Detail_Frame=Frame(self.root,bd=4,relief=RIDGE,bg="orange")
+        Detail_Frame.place(x=500,y=100,width=825,height=580)
+        
+        lbl_search=Label(Detail_Frame,text="Search by ",bg="orange",fg="black",font=("times new roman",20,"bold"))
+        lbl_search.grid(row=0,column=0,pady=10,padx=20,sticky="w")
+        
+        combo_search=ttk.Combobox(Detail_Frame,textvariable=self.search_by,width=10,font=("times new roman",10,"bold"),state='readonly')
+        combo_search['values']=("Name","ID","Contact")
+        combo_search.grid(row=0,column=1,padx=20,pady=10)
+        
+        txt_Search=Entry(Detail_Frame,textvariable=self.search_txt,width=20,font=("times new roman",14,"bold"),bd=5,relief=GROOVE)
+        txt_Search.grid(row=0,column=2,pady=10,padx=20,sticky="w")
+        searchbtn=Button(Detail_Frame,text="SEARCH",width=10,pady=5,command=self.search_data).grid(row=0,column=3,padx=10,pady=10)
+        showallbtn=Button(Detail_Frame,text="SHOW ALL",width=10,pady=5,command=self.fetch_data).grid(row=0,column=4,padx=10,pady=10)
+        
+        #==================Table Frame========================
+        
+        Table_Frame=Frame(Detail_Frame,bd=4,relief=RIDGE,bg="orange")
+        Table_Frame.place(x=10,y=70,width=800,height=490)
+        
+        scroll_x=Scrollbar(Table_Frame,orient=HORIZONTAL)
+        scroll_y=Scrollbar(Table_Frame,orient=VERTICAL)
+        self.Employee_table=ttk.Treeview(Table_Frame,columns=("Employee ID","Name","E-mail","Contact","Post","Salary"),xscrollcommand=scroll_x.set,yscrollcommand=scroll_y.set)
+        scroll_x.pack(side=BOTTOM,fill=X)
+        scroll_y.pack(side=RIGHT,fill=Y)
+        scroll_x.config(command=self.Employee_table.xview)
+        scroll_y.config(command=self.Employee_table.yview)
+        self.Employee_table.heading("Employee ID",text="Employee ID")
+        self.Employee_table.heading("Name",text="Name")
+        self.Employee_table.heading("E-mail",text="E-mail")
+        self.Employee_table.heading("Contact",text="Contact")
+        self.Employee_table.heading("Post",text="Designation")
+        self.Employee_table.heading("Salary",text="Salary")
+        self.Employee_table['show']='headings'
+        self.Employee_table.column("Employee ID",width=100)
+        self.Employee_table.column("Name",width=100)
+        self.Employee_table.column("E-mail",width=100)
+        self.Employee_table.column("Contact",width=100)
+        self.Employee_table.column("Post",width=100)
+        self.Employee_table.column("Salary",width=100)
+        self.Employee_table.pack(fill=BOTH,expand=1)
+        self.Employee_table.bind("<ButtonRelease-1>",self.get_cursor)
+        self.fetch_data()
+    def add_employees(self):
+        con=pymysql.connect(host="localhost",user="root",password="",database="stm")
+        cur=con.cursor()
+        cur.execute("insert into employees values(%s,%s,%s,%s,%s,%s)",(self.id_var.get(),
+                                                                       self.name_var.get(),
+                                                                       self.email_var.get(),
+                                                                       self.contact_var.get(),
+                                                                       self.post_var.get(),
+                                                                       self.salary_var.get()
+                                                                      ))
+        con.commit()
+        self.fetch_data()
+        self.clear()
+        con.close()
+    def fetch_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="",database="stm")
+        cur=con.cursor()
+        cur.execute("select * from employees")
+        rows=cur.fetchall()
+        if len(rows)!=0:
+            self.Employee_table.delete(*self.Employee_table.get_children())
+            for row in rows:
+                self.Employee_table.insert('',END,values=row)
+                con.commit()
+        con.close()        
+    def clear(self):
+        self.id_var.set("")
+        self.name_var.set("")
+        self.email_var.set("")    
+        self.contact_var.set("")
+        self.post_var.set("")
+        self.salary_var.set("")
+    def get_cursor(self,ev):
+        cursor_row=self.Employee_table.focus()
+        contents=self.Employee_table.item(cursor_row)
+        row=contents['values']
+        self.id_var.set(row[0])
+        self.name_var.set(row[1])
+        self.email_var.set(row[2])    
+        self.contact_var.set(row[3])
+        self.post_var.set(row[4])
+        self.salary_var.set(row[5])
+    def update_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="",database="stm")
+        cur=con.cursor()
+        cur.execute("update employees set name=%s,email=%s,contact=%s,post=%s,salary=%s where id=%s",(
+                                                                       self.name_var.get(),
+                                                                       self.email_var.get(),
+                                                                       self.contact_var.get(),
+                                                                       self.post_var.get(),
+                                                                       self.salary_var.get(),
+                                                                       self.id_var.get()
+                                                                      ))
+        con.commit()
+        self.fetch_data()
+        self.clear()
+        con.close()
+    def delete_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="",database="stm")
+        cur=con.cursor()
+        cur.execute("delete from employees where id=%s",self.id_var.get())
+        con.commit()
+        con.close()   
+        self.fetch_data()
+        self.clear()
+    def search_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="",database="stm")
+        cur=con.cursor()
+        cur.execute("select * from employees where "+str(self.search_by.get())+" LIKE '%"+str(self.search_txt.get())+"%'")
+        rows=cur.fetchall()
+        if len(rows)!=0:
+            self.Employee_table.delete(*self.Employee_table.get_children())
+            for row in rows:
+                self.Employee_table.insert('',END,values=row)
+                con.commit()
+        con.close()        
+        
+    
+    
+root=Tk()
+ob=Employee(root)
+root.mainloop()

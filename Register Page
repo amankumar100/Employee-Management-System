@@ -1,0 +1,79 @@
+from tkinter import*
+from tkinter import ttk,messagebox
+import pymysql
+class Register:
+    def __init__(self,root):
+        self.root=root
+        self.root.title("Registration form")
+        self.root.geometry("1550x900+0+0")
+        frame1=Frame(self.root,bg="white")
+        frame1.place(x=300,y=100,width=700,height=500)
+        title=Label(frame1,text="REGISTER HERE",font=("times new roman",20,"bold"),bg="white",fg="black").place(x=50,y=30)
+        name=Label(frame1,text="NAME *",font=("times new roman",15,"bold"),bg="white",fg="red").place(x=50,y=100)
+        self.txt_name=Entry(frame1,font=("times new roman",15),bg="lightgray")
+        self.txt_name.place(x=50,y=130,width=570)
+        #id=Label(frame1,text="Employee ID",font=("times new roman",15,"bold"),bg="white",fg="gray").place(x=370,y=100)
+        #self.txt_id=Entry(frame1,font=("times new roman",15),bg="lightgray")
+        #self.txt_id.place(x=370,y=130,width=250)
+        email=Label(frame1,text="E-Mail *",font=("times new roman",15,"bold"),bg="white",fg="red").place(x=50,y=170)
+        self.txt_email=Entry(frame1,font=("times new roman",15),bg="lightgray")
+        self.txt_email.place(x=50,y=200,width=250)
+        contact=Label(frame1,text="Phone Number *",font=("times new roman",15,"bold"),bg="white",fg="red").place(x=370,y=170)
+        self.txt_contact=Entry(frame1,font=("times new roman",15),bg="lightgray")
+        self.txt_contact.place(x=370,y=200,width=250)
+        pwd=Label(frame1,text="Password *",font=("times new roman",15,"bold"),bg="white",fg="red").place(x=50,y=240)
+        self.txt_pwd=Entry(frame1,show="•",font=("times new roman",15),bg="lightgray")
+        self.txt_pwd.place(x=50,y=280,width=250)
+        c_pwd=Label(frame1,text="Confirm Password *",font=("times new roman",15,"bold"),bg="white",fg="red").place(x=370,y=250)
+        self.txt_c_pwd=Entry(frame1,show="•",font=("times new roman",15),bg="lightgray")
+        self.txt_c_pwd.place(x=370,y=280,width=250)
+        self.var_chk=IntVar()
+        chk=Checkbutton(frame1,cursor="hand2",text="I agree the terms and conditions",variable=self.var_chk,onvalue=1,offvalue=0,bg="white",font=("times new roman",12)).place(x=50,y=380)
+        btn_rg=Button(frame1,cursor="hand2",text="Register",font=("times new roman",15),bg="lightblue",command=self.register_data).place(x=300,y=420)
+        btn_log=Button(frame1,cursor="hand2",text="Sign In",font=("times new roman",15),bg="lightblue",command=self.log_window).place(x=400,y=420)  
+    
+    def log_window(self):
+        self.root.destroy()
+        import Log
+    
+    def clear(self):
+        self.txt_name.delete(0,END)
+        #self.txt_id.delete(0,END)
+        self.txt_contact.delete(0,END)
+        self.txt_email.delete(0,END)
+        self.txt_pwd.delete(0,END)
+        self.txt_c_pwd.delete(0,END)   
+    def register_data(self):
+        if self.txt_name.get()==""  or self.txt_email.get()=="" or self.txt_contact.get()=="" or self.txt_pwd.get()=="" or self.txt_c_pwd.get()=="":
+                messagebox.showerror("Error","All fields required",parent=self.root)
+        elif self.txt_pwd.get()!=self.txt_c_pwd.get():
+            messagebox.showerror("Error","Password and confirm password must be same",parent=self.root)   
+        elif self.var_chk.get()==0:
+            messagebox.showerror("Error","Please agree our terms and conditions",parent=self.root)         
+        else:
+           try:
+               con=pymysql.connect(host="localhost",user="root",password="",database="employee3")
+               cur=con.cursor()
+               cur.execute("select * from employee3 where email=%s",self.txt_email.get())
+               row=cur.fetchone() 
+               if row!=None:
+                   messagebox.showerror("Error","User already exist. Please try with another email",parent=self.root)
+               else:
+                   cur.execute("insert into employee3(name,contact,email,password) values(%s,%s,%s,%s)",
+                           (
+                               self.txt_name.get(),
+                               self.txt_contact.get(),
+                               self.txt_email.get(),
+                               self.txt_pwd.get()                               
+                           ))
+               con.commit()
+               con.close()
+               messagebox.showinfo("Success","Registration Successful",parent=self.root)
+               self.root.destroy()
+               import Log
+               self.clear()     
+           except Exception as es:
+               messagebox.showerror("Error",f"Error due to {str(es)}",parent=self.root)  
+root=Tk()
+obj=Register(root)
+root.mainloop()

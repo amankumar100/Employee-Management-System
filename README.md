@@ -9,5 +9,5 @@ Then first run the register page, enter your details it will open login page, lo
 
 # Basic requirements :
 1. VSCode or any other comfortable coding platform.
-2. XAMP Control Panel for database operation, you can prefer similar working other softwares also.
+2. XAMPP Control Panel for database operation, you can prefer similar working other softwares also.
 3. Python setup in your laptop or desktop.
